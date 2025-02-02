@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { navLinks } from "./navLinks"; // Import the navLinks array
+import { navLinks } from "@/components/topbar/navLinks"; // Import the navLinks array
 
 export default function TopBar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,7 +11,7 @@ export default function TopBar() {
   return (
     <nav className="bg-gray-900 text-white py-4 px-6 flex justify-between items-center">
       {/* Logo */}
-      <h1 className="text-xl font-bold">My Website</h1>
+      <h1 className="text-xl font-bold">Utsobkotha</h1>
 
       {/* Desktop Menu (Dynamically Rendered) */}
       <div className="hidden md:flex space-x-6">
