@@ -86,7 +86,7 @@ export default function Registration() {
           </p>
 
           {/* Name Field */}
-          <label className="relative block mb-4">
+          <div className="relative mb-4">
             <input
               type="text"
               placeholder=" "
@@ -98,26 +98,26 @@ export default function Registration() {
                   setFormData((prev) => ({ ...prev, name: "" }));
                 }
               }}
-              className={`w-full px-3 py-2 bg-white text-gray-500 border rounded-lg focus:outline-none ${
+              className={`w-full px-4 py-3 pr-10 bg-white text-gray-600 border rounded-lg focus:outline-none ${
                 errors.name
                   ? "border-red-500"
-                  : "border-gray-300 focus:border-blue-500"
+                  : "border-gray-300 focus:border-primary"
               }`}
             />
-            <span
-              className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 ${
-                formData.name ? "text-xs top-1" : "text-base"
+            <label
+              className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 ${
+                formData.name ? "text-xs top-2" : ""
               } ${errors.name ? "text-red-500" : ""}`}
             >
               Name
-            </span>
+            </label>
             {errors.name && (
               <p className="text-red-500 text-xs mt-1">{errors.name}</p>
             )}
-          </label>
+          </div>
 
           {/* Email Field */}
-          <label className="relative block mb-4">
+          <div className="relative mb-4">
             <input
               type="email"
               placeholder=" "
@@ -129,26 +129,26 @@ export default function Registration() {
                   setFormData((prev) => ({ ...prev, email: "" }));
                 }
               }}
-              className={`w-full px-3 py-2 bg-white text-gray-500 border rounded-lg focus:outline-none ${
+              className={`w-full px-4 py-3 pr-10 bg-white text-gray-600 border rounded-lg focus:outline-none ${
                 errors.email
                   ? "border-red-500"
-                  : "border-gray-300 focus:border-blue-500"
+                  : "border-gray-300 focus:border-primary"
               }`}
             />
-            <span
-              className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 ${
-                formData.email ? "text-xs top-1" : "text-base"
+            <label
+              className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 ${
+                formData.email ? "text-xs top-2" : ""
               } ${errors.email ? "text-red-500" : ""}`}
             >
               Email
-            </span>
+            </label>
             {errors.email && (
               <p className="text-red-500 text-xs mt-1">{errors.email}</p>
             )}
-          </label>
+          </div>
 
           {/* Password Field */}
-          <label className="relative block mb-4">
+          <div className="relative mb-4">
             <input
               type={showPassword ? "text" : "password"}
               placeholder=" "
@@ -160,22 +160,22 @@ export default function Registration() {
                   setFormData((prev) => ({ ...prev, password: "" }));
                 }
               }}
-              className={`w-full px-3 py-2 bg-white text-gray-500 border rounded-lg focus:outline-none ${
+              className={`w-full px-4 py-3 pr-10 bg-white text-gray-600 border rounded-lg focus:outline-none ${
                 errors.password
                   ? "border-red-500"
-                  : "border-gray-300 focus:border-blue-500"
+                  : "border-gray-300 focus:border-primary"
               }`}
             />
-            <span
-              className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 ${
-                formData.password ? "text-xs top-1" : "text-base"
+            <label
+              className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 ${
+                formData.password ? "text-xs top-2" : ""
               } ${errors.password ? "text-red-500" : ""}`}
             >
               Password
-            </span>
+            </label>
             <button
               type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? (
@@ -187,10 +187,10 @@ export default function Registration() {
             {errors.password && (
               <p className="text-red-500 text-xs mt-1">{errors.password}</p>
             )}
-          </label>
+          </div>
 
           {/* Confirm Password Field */}
-          <label className="relative block mb-4">
+          <div className="relative mb-6">
             <input
               type={showConfirmPassword ? "text" : "password"}
               placeholder=" "
@@ -202,22 +202,22 @@ export default function Registration() {
                   setFormData((prev) => ({ ...prev, confirmPassword: "" }));
                 }
               }}
-              className={`w-full px-3 py-2 bg-white text-gray-500 border rounded-lg focus:outline-none ${
+              className={`w-full px-4 py-3 pr-10 bg-white text-gray-600 border rounded-lg focus:outline-none ${
                 errors.confirmPassword
                   ? "border-red-500"
-                  : "border-gray-300 focus:border-blue-500"
+                  : "border-gray-300 focus:border-primary"
               }`}
             />
-            <span
-              className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 ${
-                formData.confirmPassword ? "text-xs top-1" : "text-base"
+            <label
+              className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 ${
+                formData.confirmPassword ? "text-xs top-2" : ""
               } ${errors.confirmPassword ? "text-red-500" : ""}`}
             >
               Confirm Password
-            </span>
+            </label>
             <button
               type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             >
               {showConfirmPassword ? (
@@ -231,12 +231,12 @@ export default function Registration() {
                 {errors.confirmPassword}
               </p>
             )}
-          </label>
+          </div>
 
           {/* Submit Button */}
           <button
             type="button"
-            className="submit-btn w-full bg-blue-500 text-white font-medium py-2 rounded-lg hover:bg-blue-600 transition"
+            className="w-full py-3 px-5 bg-primary text-white font-medium text-sm uppercase rounded-lg hover:bg-indigo-700 transition"
             onClick={handleClick}
           >
             Submit
@@ -245,7 +245,7 @@ export default function Registration() {
 
         <p className="signin-text text-center text-sm text-gray-500 mt-4">
           Already have an account?{" "}
-          <a href="/login" className="text-blue-500 hover:underline">
+          <a href="/login" className="text-accent">
             Sign in
           </a>
         </p>
