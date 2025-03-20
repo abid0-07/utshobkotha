@@ -1,146 +1,195 @@
-"use client";
-import React, { useState } from "react";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+"use client"
 
-const Form = () => {
-  // State to manage form fields
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+import type React from "react"
 
-  // State to manage password visibility
-  const [showPassword, setShowPassword] = useState(false);
+import { useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Separator } from "@/components/ui/separator"
+import { SocialIcons } from "@/components/social-icons"
+import { useAuth } from "@/lib/auth-context"
+import { Loader2 } from "lucide-react"
 
-  // State to track errors for each field
-  const [errors, setErrors] = useState({
-    email: "",
-    password: "",
-  });
-  const handleClick = (e: any) => {
-    e.preventDefault();
+export default function LoginPage() {
+  const { login, loginWithSocial, verifyMfaCode, isLoading } = useAuth()
+  const router = useRouter()
 
-    // Reset errors
-    setErrors({ email: "", password: "" });
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [showMfaForm, setShowMfaForm] = useState(false)
+  const [mfaCode, setMfaCode] = useState("")
 
-    // Validate inputs
-    let isValid = true;
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await login(email, password)
+    setShowMfaForm(true)
+  }
 
-    if (!email.trim()) {
-      setErrors((prev) => ({ ...prev, email: "Email is required" }));
-      isValid = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setErrors((prev) => ({ ...prev, email: "Invalid email format" }));
-      isValid = false;
-    }
+  const handleMfaVerification = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await verifyMfaCode(mfaCode)
+  }
 
-    if (!password.trim()) {
-      setErrors((prev) => ({ ...prev, password: "Password is required" }));
-      isValid = false;
-    }
+  const handleSocialLogin = async (provider: "google" | "facebook" | "microsoft") => {
+    await loginWithSocial(provider)
+    setShowMfaForm(true)
+  }
 
-    // If all validations pass, log the data
-    if (isValid) {
-      console.log("Form Submitted:", {
-        email,
-        password,
-      });
-    }
-  };
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form className="bg-white p-6 max-w-sm rounded-lg shadow-lg">
-        {/* Title */}
-        <p className="text-xl font-semibold text-center text-gray-800 mb-6">
-          Sign in to your account
-        </p>
-
-        {/* Email Input */}
-        <div className="relative mb-4">
-          <label
-            className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 ${
-              email ? "text-xs top-2" : ""
-            } ${errors.email ? "text-red-500" : ""}`}
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={`w-full px-4 py-3 pr-10 bg-white border rounded-lg focus:outline-none ${
-              errors.email
-                ? "border-red-500"
-                : "border-gray-300 focus:border-primary"
-            }`}
-            onFocus={() => {
-              if (!email) {
-                setEmail(""); // Clear placeholder on focus
-              }
-            }}
-          />
-          {errors.email && (
-            <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-          )}
+    <div className="container flex h-screen w-screen flex-col items-center justify-center">
+      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+        <div className="flex flex-col space-y-2 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+          <p className="text-sm text-muted-foreground">Enter your credentials to sign in to your account</p>
         </div>
 
-        {/* Password Input */}
-        <div className="relative mb-6">
-          <label
-            className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 ${
-              password ? "text-xs top-2" : ""
-            } ${errors.password ? "text-red-500" : ""}`}
-          >
-            Password
-          </label>
-          <input
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={`w-full px-4 py-3 pr-10 bg-white border rounded-lg focus:outline-none ${
-              errors.password
-                ? "border-red-500"
-                : "border-gray-300 focus:border-primary"
-            }`}
-            onFocus={() => {
-              if (!password) {
-                setPassword(""); // Clear placeholder on focus
-              }
-            }}
-          />
-          <button
-            type="button"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? (
-              <EyeSlashIcon className="h-5 w-5" />
-            ) : (
-              <EyeIcon className="h-5 w-5" />
-            )}
-          </button>
-          {errors.password && (
-            <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-          )}
-        </div>
+        {showMfaForm ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Two-Factor Authentication</CardTitle>
+              <CardDescription>Enter the verification code sent to your device</CardDescription>
+            </CardHeader>
+            <form onSubmit={handleMfaVerification}>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="mfa-code">Verification Code</Label>
+                  <Input
+                    id="mfa-code"
+                    placeholder="Enter 6-digit code"
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value)}
+                    required
+                  />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full" type="submit" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    "Verify"
+                  )}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        ) : (
+          <Tabs defaultValue="credentials" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="credentials">Credentials</TabsTrigger>
+              <TabsTrigger value="social">Social Login</TabsTrigger>
+            </TabsList>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full py-3 px-5 bg-primary text-white font-medium text-sm uppercase rounded-lg hover:bg-indigo-700 transition"
-          onClick={handleClick}
-        >
-          Sign in
-        </button>
+            <TabsContent value="credentials">
+              <Card>
+                <form onSubmit={handleLogin}>
+                  <CardContent className="pt-4 space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="m.example@diu.edu"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="password">Password</Label>
+                        <Link href="/auth/forgot-password" className="text-xs text-primary hover:underline">
+                          Forgot password?
+                        </Link>
+                      </div>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex flex-col">
+                    <Button className="w-full" type="submit" disabled={isLoading}>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Signing in...
+                        </>
+                      ) : (
+                        "Sign in"
+                      )}
+                    </Button>
 
-        {/* Signup Link */}
-        <p className="mt-4 text-sm text-center text-gray-500">
-          No account?{" "}
-          <a href="registration" className="text-accent">
-            Sign up
-          </a>
-        </p>
-      </form>
+                    <p className="mt-4 text-center text-sm text-muted-foreground">
+                      Don't have an account?{" "}
+                      <Link href="/auth/register" className="text-primary hover:underline">
+                        Sign up
+                      </Link>
+                    </p>
+                  </CardFooter>
+                </form>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="social">
+              <Card>
+                <CardContent className="pt-6 space-y-4">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => handleSocialLogin("google")}
+                    disabled={isLoading}
+                  >
+                    <SocialIcons.Google className="mr-2 h-4 w-4" />
+                    Continue with Google
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => handleSocialLogin("facebook")}
+                    disabled={isLoading}
+                  >
+                    <SocialIcons.Facebook className="mr-2 h-4 w-4" />
+                    Continue with Facebook
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => handleSocialLogin("microsoft")}
+                    disabled={isLoading}
+                  >
+                    <SocialIcons.Microsoft className="mr-2 h-4 w-4" />
+                    Continue with Microsoft
+                  </Button>
+                </CardContent>
+                <CardFooter className="flex flex-col">
+                  <Separator className="my-4" />
+                  <p className="text-center text-sm text-muted-foreground">
+                    Don't have an account?{" "}
+                    <Link href="/auth/register" className="text-primary hover:underline">
+                      Sign up
+                    </Link>
+                  </p>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        )}
+      </div>
     </div>
-  );
-};
+  )
+}
 
-export default Form;
