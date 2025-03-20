@@ -1,40 +1,28 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { DatePicker } from "@/components/date-picker";
-import { TimePicker } from "@/components/time-picker";
-import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/lib/auth-context";
-import { eventCategories } from "@/lib/data";
-import { Loader2 } from "lucide-react";
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DatePicker } from "@/components/date-picker"
+import { TimePicker } from "@/components/time-picker"
+import { useToast } from "@/components/ui/use-toast"
+import { useAuth } from "@/lib/auth-context"
+import { eventCategories } from "@/lib/data"
+import { Loader2 } from "lucide-react"
 
 export default function CreateEventPage() {
-  const { user } = useAuth();
-  const router = useRouter();
-  const { toast } = useToast();
+  const { user } = useAuth()
+  const router = useRouter()
+  const { toast } = useToast()
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -45,76 +33,74 @@ export default function CreateEventPage() {
     location: "",
     capacity: "",
     price: "Free",
-  });
+  })
 
   // Check user role once on component mount
   useEffect(() => {
     if (user && user.role !== "organizer" && user.role !== "admin") {
-      router.push("/");
+      router.push("/")
     }
-  }, [user, router]);
+  }, [user, router])
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   // Create separate handlers for each complex input to avoid circular dependencies
   const handleDateChange = (date?: Date) => {
     setFormData((prev) => ({
       ...prev,
       date: date ? date.toISOString().split("T")[0] : "",
-    }));
-  };
+    }))
+  }
 
   const handleStartTimeChange = (time: string) => {
     setFormData((prev) => ({
       ...prev,
       startTime: time,
-    }));
-  };
+    }))
+  }
 
   const handleEndTimeChange = (time: string) => {
     setFormData((prev) => ({
       ...prev,
       endTime: time,
-    }));
-  };
+    }))
+  }
 
   const handleCategoryChange = (value: string) => {
     setFormData((prev) => ({
       ...prev,
       category: value,
-    }));
-  };
+    }))
+  }
 
   const handlePriceChange = (value: string) => {
     setFormData((prev) => ({
       ...prev,
       price: value,
-    }));
-  };
+    }))
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+    e.preventDefault()
+    setIsSubmitting(true)
 
     // Simulate API call
     setTimeout(() => {
       toast({
         title: "Event Created",
         description: "Your event has been created successfully.",
-      });
-      setIsSubmitting(false);
-      router.push("/events/manage");
-    }, 1500);
-  };
+      })
+      setIsSubmitting(false)
+      router.push("/events/manage")
+    }, 1500)
+  }
 
   // If user is not authorized, don't render the form
   if (user && user.role !== "organizer" && user.role !== "admin") {
-    return null;
+    return null
   }
 
   return (
@@ -127,9 +113,7 @@ export default function CreateEventPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Basic Information</CardTitle>
-                <CardDescription>
-                  Provide the main details about your event.
-                </CardDescription>
+                <CardDescription>Provide the main details about your event.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -159,11 +143,7 @@ export default function CreateEventPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={handleCategoryChange}
-                    required
-                  >
+                  <Select value={formData.category} onValueChange={handleCategoryChange} required>
                     <SelectTrigger id="category">
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
@@ -182,33 +162,22 @@ export default function CreateEventPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Date & Time</CardTitle>
-                <CardDescription>
-                  When will your event take place?
-                </CardDescription>
+                <CardDescription>When will your event take place?</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Event Date</Label>
-                  <DatePicker
-                    date={formData.date ? new Date(formData.date) : undefined}
-                    setDate={handleDateChange}
-                  />
+                  <DatePicker date={formData.date ? new Date(formData.date) : undefined} setDate={handleDateChange} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Start Time</Label>
-                    <TimePicker
-                      time={formData.startTime}
-                      setTime={handleStartTimeChange}
-                    />
+                    <TimePicker time={formData.startTime} setTime={handleStartTimeChange} />
                   </div>
                   <div className="space-y-2">
                     <Label>End Time</Label>
-                    <TimePicker
-                      time={formData.endTime}
-                      setTime={handleEndTimeChange}
-                    />
+                    <TimePicker time={formData.endTime} setTime={handleEndTimeChange} />
                   </div>
                 </div>
               </CardContent>
@@ -217,10 +186,7 @@ export default function CreateEventPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Location & Capacity</CardTitle>
-                <CardDescription>
-                  Where will your event take place and how many people can
-                  attend?
-                </CardDescription>
+                <CardDescription>Where will your event take place and how many people can attend?</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -250,10 +216,7 @@ export default function CreateEventPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="price">Price</Label>
-                  <Select
-                    value={formData.price}
-                    onValueChange={handlePriceChange}
-                  >
+                  <Select value={formData.price} onValueChange={handlePriceChange}>
                     <SelectTrigger id="price">
                       <SelectValue placeholder="Select price type" />
                     </SelectTrigger>
@@ -272,9 +235,7 @@ export default function CreateEventPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Event Banner</CardTitle>
-                <CardDescription>
-                  Upload an image to represent your event.
-                </CardDescription>
+                <CardDescription>Upload an image to represent your event.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors">
@@ -300,17 +261,12 @@ export default function CreateEventPage() {
                       </svg>
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      <label
-                        htmlFor="banner-upload"
-                        className="font-medium text-primary cursor-pointer"
-                      >
+                      <label htmlFor="banner-upload" className="font-medium text-primary cursor-pointer">
                         Click to upload
                       </label>{" "}
                       or drag and drop
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      SVG, PNG, JPG or GIF (max. 2MB)
-                    </p>
+                    <p className="text-xs text-muted-foreground">SVG, PNG, JPG or GIF (max. 2MB)</p>
                     <input id="banner-upload" type="file" className="sr-only" />
                   </div>
                 </div>
@@ -319,11 +275,7 @@ export default function CreateEventPage() {
           </div>
 
           <div className="flex justify-end gap-4 mt-8">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => router.back()}
-            >
+            <Button variant="outline" type="button" onClick={() => router.back()}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
@@ -340,5 +292,6 @@ export default function CreateEventPage() {
         </form>
       </div>
     </div>
-  );
+  )
 }
+
