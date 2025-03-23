@@ -18,13 +18,32 @@ export function TimePicker({ time, setTime }: TimePickerProps) {
   const minutes = ["00", "15", "30", "45"]
   const periods = ["AM", "PM"]
 
-  const [selectedHour, setSelectedHour] = React.useState(time ? time.split(":")[0] : "09")
-  const [selectedMinute, setSelectedMinute] = React.useState(time ? time.split(":")[1].slice(0, 2) : "00")
-  const [selectedPeriod, setSelectedPeriod] = React.useState(time ? time.slice(-2) : "AM")
+  // Parse the initial time value
+  const [selectedHour, setSelectedHour] = React.useState(() => {
+    if (!time) return "09"
+    const parts = time.split(":")
+    return parts[0] || "09"
+  })
 
+  const [selectedMinute, setSelectedMinute] = React.useState(() => {
+    if (!time) return "00"
+    const parts = time.split(":")
+    return parts[1]?.slice(0, 2) || "00"
+  })
+
+  const [selectedPeriod, setSelectedPeriod] = React.useState(() => {
+    if (!time) return "AM"
+    return time.slice(-2) || "AM"
+  })
+
+  // Use useEffect with proper dependency array to prevent infinite loops
   React.useEffect(() => {
     if (selectedHour && selectedMinute && selectedPeriod) {
-      setTime(`${selectedHour}:${selectedMinute} ${selectedPeriod}`)
+      const newTime = `${selectedHour}:${selectedMinute} ${selectedPeriod}`
+      // Only update if the time has actually changed
+      if (newTime !== time) {
+        setTime(newTime)
+      }
     }
   }, [selectedHour, selectedMinute, selectedPeriod, setTime])
 

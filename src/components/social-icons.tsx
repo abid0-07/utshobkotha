@@ -59,3 +59,26 @@ export function AppleIcon(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
+export const SocialIcons = {
+  Google: GoogleIcon,
+  Facebook: FacebookIcon,
+  Microsoft: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7.8 2h8.4l5.8 8.4V22H2V2L7.8 2z" />
+      <path d="M2 22h20" />
+    </svg>
+  ),
+  Apple: AppleIcon,
+}
+

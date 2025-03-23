@@ -13,6 +13,11 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ date, setDate }: DatePickerProps) {
+  // Prevent unnecessary re-renders by handling the date selection directly
+  const handleSelect = (newDate: Date | undefined) => {
+    setDate(newDate)
+  }
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -25,7 +30,7 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
-        <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+        <Calendar mode="single" selected={date} onSelect={handleSelect} initialFocus />
       </PopoverContent>
     </Popover>
   )
