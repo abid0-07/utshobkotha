@@ -1,58 +1,71 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
-import { SocialIcons } from "@/components/social-icons"
-import { useAuth } from "@/lib/auth-context"
-import { Loader2 } from "lucide-react"
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { SocialIcons } from "@/components/social-icons";
+import { useAuth } from "@/lib/auth-context";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
-  const { login, loginWithSocial, verifyMfaCode, isLoading } = useAuth()
-  const router = useRouter()
+  const { login, loginWithSocial, verifyMfaCode, isLoading } = useAuth();
+  const router = useRouter();
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showMfaForm, setShowMfaForm] = useState(false)
-  const [mfaCode, setMfaCode] = useState("")
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showMfaForm, setShowMfaForm] = useState(false);
+  const [mfaCode, setMfaCode] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await login(email, password)
-    setShowMfaForm(true)
-  }
+    e.preventDefault();
+    await login(email, password);
+    setShowMfaForm(true);
+  };
 
   const handleMfaVerification = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await verifyMfaCode(mfaCode)
-  }
+    e.preventDefault();
+    await verifyMfaCode(mfaCode);
+  };
 
-  const handleSocialLogin = async (provider: "google" | "facebook" | "microsoft") => {
-    await loginWithSocial(provider)
-    setShowMfaForm(true)
-  }
+  // const handleSocialLogin = async (provider: "google" | "facebook" | "microsoft") => {
+  //   await loginWithSocial(provider)
+  //   setShowMfaForm(true)
+  // }
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
         <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-          <p className="text-sm text-muted-foreground">Enter your credentials to sign in to your account</p>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Welcome back
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Enter your credentials to sign in to your account
+          </p>
         </div>
 
         {showMfaForm ? (
           <Card>
             <CardHeader>
               <CardTitle>Two-Factor Authentication</CardTitle>
-              <CardDescription>Enter the verification code sent to your device</CardDescription>
+              <CardDescription>
+                Enter the verification code sent to your device
+              </CardDescription>
             </CardHeader>
             <form onSubmit={handleMfaVerification}>
               <CardContent className="space-y-4">
@@ -83,11 +96,6 @@ export default function LoginPage() {
           </Card>
         ) : (
           <Tabs defaultValue="credentials" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="credentials">Credentials</TabsTrigger>
-              <TabsTrigger value="social">Social Login</TabsTrigger>
-            </TabsList>
-
             <TabsContent value="credentials">
               <Card>
                 <form onSubmit={handleLogin}>
@@ -106,7 +114,10 @@ export default function LoginPage() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="password">Password</Label>
-                        <Link href="/auth/forgot-password" className="text-xs text-primary hover:underline">
+                        <Link
+                          href="/auth/forgot-password"
+                          className="text-xs text-primary hover:underline"
+                        >
                           Forgot password?
                         </Link>
                       </div>
@@ -120,7 +131,11 @@ export default function LoginPage() {
                     </div>
                   </CardContent>
                   <CardFooter className="flex flex-col">
-                    <Button className="w-full" type="submit" disabled={isLoading}>
+                    <Button
+                      className="w-full"
+                      type="submit"
+                      disabled={isLoading}
+                    >
                       {isLoading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -133,7 +148,10 @@ export default function LoginPage() {
 
                     <p className="mt-4 text-center text-sm text-muted-foreground">
                       Don't have an account?{" "}
-                      <Link href="/auth/register" className="text-primary hover:underline">
+                      <Link
+                        href="/auth/register"
+                        className="text-primary hover:underline"
+                      >
                         Sign up
                       </Link>
                     </p>
@@ -141,55 +159,9 @@ export default function LoginPage() {
                 </form>
               </Card>
             </TabsContent>
-
-            <TabsContent value="social">
-              <Card>
-                <CardContent className="pt-6 space-y-4">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={() => handleSocialLogin("google")}
-                    disabled={isLoading}
-                  >
-                    <SocialIcons.Google className="mr-2 h-4 w-4" />
-                    Continue with Google
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={() => handleSocialLogin("facebook")}
-                    disabled={isLoading}
-                  >
-                    <SocialIcons.Facebook className="mr-2 h-4 w-4" />
-                    Continue with Facebook
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={() => handleSocialLogin("microsoft")}
-                    disabled={isLoading}
-                  >
-                    <SocialIcons.Microsoft className="mr-2 h-4 w-4" />
-                    Continue with Microsoft
-                  </Button>
-                </CardContent>
-                <CardFooter className="flex flex-col">
-                  <Separator className="my-4" />
-                  <p className="text-center text-sm text-muted-foreground">
-                    Don't have an account?{" "}
-                    <Link href="/auth/register" className="text-primary hover:underline">
-                      Sign up
-                    </Link>
-                  </p>
-                </CardFooter>
-              </Card>
-            </TabsContent>
           </Tabs>
         )}
       </div>
     </div>
-  )
+  );
 }
-
