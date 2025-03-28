@@ -57,6 +57,8 @@ export default function EventDetailPage() {
 
   const [isRegistrationDialogOpen, setIsRegistrationDialogOpen] =
     useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
 
   // Find the event with the matching ID
   const event = upcomingEvents.find((e) => e.id === id);
@@ -91,6 +93,16 @@ export default function EventDetailPage() {
       description: `You have successfully registered for ${event.title}. Check your email for confirmation.`,
     });
     setIsRegistrationDialogOpen(false);
+  };
+
+  const handleDeleteEvent = () => {
+    // In a real app, this would make an API call to delete the event
+    toast({
+      title: "Event Deleted",
+      description: "The event has been successfully deleted.",
+    });
+    setIsDeleteDialogOpen(false);
+    router.push("/events");
   };
 
   return (
@@ -508,22 +520,21 @@ export default function EventDetailPage() {
                       <Link href="/profile/tickets">View Ticket</Link>
                     </Button>
                     {user &&
-                      (user.role === "organizer" ||
-                        user.role === "faculty" ||
-                        user.role === "admin") && (
+                      (user.role === "organizer" || user.role === "admin") && (
                         <div className="mt-4 space-y-2">
                           <Button className="w-full" variant="outline" asChild>
-                            <Link href={`/events/${id}/volunteers`}>
-                              Manage Volunteers
-                            </Link>
+                            <Link href={`/events/edit/${id}`}>Edit Event</Link>
                           </Button>
-                          {/* {isVolunteer && (
-                          <Button className="w-full" variant="outline" asChild>
-                            <Link href={`/events/${id}/participants`}>
-                              View Participants
-                            </Link>
+                          <Button
+                            className="w-full"
+                            variant="destructive"
+                            onClick={() => {
+                              setSelectedEvent(id as string);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                          >
+                            Delete Event
                           </Button>
-                        )} */}
                         </div>
                       )}
                   </div>
@@ -656,6 +667,28 @@ export default function EventDetailPage() {
           </div>
         </div>
       </div>
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Event</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this event? This action cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteEvent}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
