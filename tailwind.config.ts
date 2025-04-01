@@ -40,7 +40,7 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
-        border: "hsl(var(--border))",
+        // border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         chart: {
@@ -62,9 +62,9 @@ export default {
         },
         primary: "#1E90FF", // Dodger Blue
         secondary: "#FFFFFF", // White
-        accent: "#28A745", // Green
-        neutral: "#F5F5F5", // Light Gray
-        // border: "#D1D5DB", // Light Gray for borders
+        accent: "#1583b3", // Green
+        neutral: "#8fddff", // Light Gray
+        border: "#B0C4DE",
       },
       borderRadius: {
         lg: "var(--radius)",
