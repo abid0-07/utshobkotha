@@ -38,16 +38,7 @@ import {
   volunteerOpportunities,
   userRegistrations,
 } from "@/lib/data";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { VolunteerApplicationForm } from "@/components/volunteer-application-form";
 
 export default function EventDetailPage() {
   const { id } = useParams();
@@ -248,73 +239,20 @@ export default function EventDetailPage() {
                                       for {event.title}
                                     </DialogDescription>
                                   </DialogHeader>
-                                  <div className="space-y-4 py-4">
-                                    <div className="space-y-2">
-                                      <Label htmlFor="motivation">
-                                        Why do you want to volunteer?
-                                      </Label>
-                                      <Textarea
-                                        id="motivation"
-                                        placeholder="Share your motivation and relevant experience..."
-                                        rows={4}
-                                      />
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label htmlFor="availability">
-                                        Availability
-                                      </Label>
-                                      <Select defaultValue="full">
-                                        <SelectTrigger id="availability">
-                                          <SelectValue placeholder="Select your availability" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="full">
-                                            Full Event
-                                          </SelectItem>
-                                          <SelectItem value="morning">
-                                            Morning Only
-                                          </SelectItem>
-                                          <SelectItem value="afternoon">
-                                            Afternoon Only
-                                          </SelectItem>
-                                          <SelectItem value="custom">
-                                            Custom Hours
-                                          </SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                      <div className="flex items-center space-x-2">
-                                        <Checkbox id="terms" />
-                                        <label
-                                          htmlFor="terms"
-                                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                          I agree to the volunteer guidelines
-                                          and responsibilities
-                                        </label>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <DialogFooter>
-                                    <Button
-                                      variant="outline"
-                                      onClick={() => {}}
-                                    >
-                                      Cancel
-                                    </Button>
-                                    <Button
-                                      onClick={() => {
-                                        toast({
-                                          title: "Application Submitted",
-                                          description:
-                                            "Your volunteer application has been submitted successfully.",
-                                        });
-                                      }}
-                                    >
-                                      Submit Application
-                                    </Button>
-                                  </DialogFooter>
+                                  <VolunteerApplicationForm
+                                    opportunityId={opportunity.id}
+                                    opportunityTitle={opportunity.title}
+                                    eventId={event.id}
+                                    eventTitle={event.title}
+                                    onSuccess={() => {
+                                      toast({
+                                        title: "Application Submitted",
+                                        description:
+                                          "Your volunteer application has been submitted successfully.",
+                                      });
+                                    }}
+                                    onCancel={() => {}}
+                                  />
                                 </DialogContent>
                               </Dialog>
                             ) : (
