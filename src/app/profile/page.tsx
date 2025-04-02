@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -26,8 +27,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth-context";
-import { updateProfile, ProfileData } from "@/lib/profile-service"; // Import the profile service
 import { Loader2, Lock } from "lucide-react";
+import Link from "next/link";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -35,7 +36,7 @@ export default function ProfilePage() {
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [profileData, setProfileData] = useState<ProfileData>({
+  const [profileData, setProfileData] = useState({
     name: "",
     email: "",
     bio: "",
@@ -68,25 +69,18 @@ export default function ProfilePage() {
     setProfileData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      await updateProfile(profileData); // Call the profile service
+    // Simulate API call
+    setTimeout(() => {
       toast({
         title: "Profile Updated",
         description: "Your profile has been updated successfully.",
       });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update profile.",
-        variant: "destructive",
-      });
-    } finally {
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
   if (!user) return null;
@@ -240,7 +234,13 @@ export default function ProfilePage() {
                       />
                     </div>
                   </CardContent>
-                  <CardFooter className="flex justify-end">
+                  <CardFooter className="flex justify-between">
+                    <Link
+                      href="/profile/volunteer"
+                      className="text-primary hover:underline"
+                    >
+                      View my volunteer applications
+                    </Link>
                     <Button type="submit" disabled={isLoading}>
                       {isLoading ? (
                         <>
@@ -255,6 +255,141 @@ export default function ProfilePage() {
                 </form>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="security">
+            <Card>
+              <CardHeader>
+                <CardTitle>Change Password</CardTitle>
+                <CardDescription>
+                  Update your password to keep your account secure
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="current-password">Current Password</Label>
+                  <Input id="current-password" type="password" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input id="new-password" type="password" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm New Password</Label>
+                  <Input id="confirm-password" type="password" />
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button>Update Password</Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <Card>
+              <CardHeader>
+                <CardTitle>Notification Preferences</CardTitle>
+                <CardDescription>
+                  Manage how you receive notifications
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Event Reminders</p>
+                      <p className="text-sm text-muted-foreground">
+                        Receive reminders before your registered events
+                      </p>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="event-reminders"
+                        className="sr-only peer"
+                        defaultChecked
+                      />
+                      <label
+                        htmlFor="event-reminders"
+                        className="relative flex h-6 w-11 cursor-pointer rounded-full bg-muted transition-colors peer-checked:bg-primary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring peer-focus:ring-offset-2"
+                      >
+                        <span className="absolute inset-y-0 left-0 flex h-6 w-6 items-center justify-center rounded-full bg-white transition-transform peer-checked:translate-x-5" />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Schedule Changes</p>
+                      <p className="text-sm text-muted-foreground">
+                        Get notified when an event's schedule changes
+                      </p>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="schedule-changes"
+                        className="sr-only peer"
+                        defaultChecked
+                      />
+                      <label
+                        htmlFor="schedule-changes"
+                        className="relative flex h-6 w-11 cursor-pointer rounded-full bg-muted transition-colors peer-checked:bg-primary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring peer-focus:ring-offset-2"
+                      >
+                        <span className="absolute inset-y-0 left-0 flex h-6 w-6 items-center justify-center rounded-full bg-white transition-transform peer-checked:translate-x-5" />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">New Volunteer Opportunities</p>
+                      <p className="text-sm text-muted-foreground">
+                        Be notified of new volunteer positions
+                      </p>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="volunteer-opps"
+                        className="sr-only peer"
+                      />
+                      <label
+                        htmlFor="volunteer-opps"
+                        className="relative flex h-6 w-11 cursor-pointer rounded-full bg-muted transition-colors peer-checked:bg-primary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring peer-focus:ring-offset-2"
+                      >
+                        <span className="absolute inset-y-0 left-0 flex h-6 w-6 items-center justify-center rounded-full bg-white transition-transform peer-checked:translate-x-5" />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Marketing Communications</p>
+                      <p className="text-sm text-muted-foreground">
+                        Receive updates about new features and events
+                      </p>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="marketing"
+                        className="sr-only peer"
+                      />
+                      <label
+                        htmlFor="marketing"
+                        className="relative flex h-6 w-11 cursor-pointer rounded-full bg-muted transition-colors peer-checked:bg-primary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring peer-focus:ring-offset-2"
+                      >
+                        <span className="absolute inset-y-0 left-0 flex h-6 w-6 items-center justify-center rounded-full bg-white transition-transform peer-checked:translate-x-5" />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button>Save Preferences</Button>
+              </CardFooter>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

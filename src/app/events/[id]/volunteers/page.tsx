@@ -1,21 +1,33 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { Textarea } from "@/components/ui/textarea"
+import { Textarea } from "@/components/ui/textarea";
 
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/label";
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -24,50 +36,67 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { useToast } from "@/components/ui/use-toast"
-import { useAuth } from "@/lib/auth-context"
-import { upcomingEvents, volunteerOpportunities } from "@/lib/data"
-import { Search, Download, Check, X, Eye } from "lucide-react"
+} from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/auth-context";
+import { upcomingEvents, volunteerOpportunities } from "@/lib/data";
+import { Search, Download, Check, X, Eye } from "lucide-react";
 
 export default function EventVolunteersPage() {
-  const { id } = useParams()
-  const router = useRouter()
-  const { user } = useAuth()
-  const { toast } = useToast()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [positionFilter, setPositionFilter] = useState("all")
-  const [selectedVolunteer, setSelectedVolunteer] = useState<string | null>(null)
-  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
+  const { id } = useParams();
+  const router = useRouter();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [positionFilter, setPositionFilter] = useState("all");
+  const [selectedVolunteer, setSelectedVolunteer] = useState<string | null>(
+    null
+  );
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
 
   // Redirect if not organizer, faculty or admin
   useEffect(() => {
-    if (user && user.role !== "organizer" && user.role !== "faculty" && user.role !== "admin") {
-      router.push(`/events/${id}`)
+    if (
+      user &&
+      user.role !== "organizer" &&
+      user.role !== "faculty" &&
+      user.role !== "admin"
+    ) {
+      router.push(`/events/${id}`);
     } else if (!user) {
-      router.push("/auth/login")
+      router.push("/auth/login");
     }
-  }, [user, router, id])
+  }, [user, router, id]);
 
-  if (!user || (user.role !== "organizer" && user.role !== "faculty" && user.role !== "admin")) return null
+  if (
+    !user ||
+    (user.role !== "organizer" &&
+      user.role !== "faculty" &&
+      user.role !== "admin")
+  )
+    return null;
 
   // Find the event with the matching ID
-  const event = upcomingEvents.find((e) => e.id === id)
+  const event = upcomingEvents.find((e) => e.id === id);
 
   // If the event doesn't exist, redirect to 404
   if (!event) {
     return (
       <div className="container py-24 text-center">
         <h1 className="text-4xl font-bold mb-4">Event Not Found</h1>
-        <p className="text-muted-foreground mb-8">The event you're looking for doesn't exist or has been removed.</p>
+        <p className="text-muted-foreground mb-8">
+          The event you're looking for doesn't exist or has been removed.
+        </p>
         <Button onClick={() => router.push("/events")}>Browse Events</Button>
       </div>
-    )
+    );
   }
 
   // Get volunteer opportunities for this event
-  const eventVolunteerOpportunities = volunteerOpportunities.filter((opp) => opp.eventId === id)
+  const eventVolunteerOpportunities = volunteerOpportunities.filter(
+    (opp) => opp.eventId === id
+  );
 
   // Mock volunteer applications
   const mockVolunteerApplications = [
@@ -81,7 +110,8 @@ export default function EventVolunteersPage() {
       position: "Technical Assistant",
       applicationDate: "2023-05-15",
       status: "Approved",
-      message: "I have experience with technical workshops and can assist participants effectively.",
+      message:
+        "I have experience with technical workshops and can assist participants effectively.",
     },
     {
       id: "va2",
@@ -93,7 +123,8 @@ export default function EventVolunteersPage() {
       position: "Stage Management",
       applicationDate: "2023-05-16",
       status: "Pending",
-      message: "I've managed stage events before and would love to help with this event.",
+      message:
+        "I've managed stage events before and would love to help with this event.",
     },
     {
       id: "va3",
@@ -105,7 +136,8 @@ export default function EventVolunteersPage() {
       position: "Technical Assistant",
       applicationDate: "2023-05-17",
       status: "Pending",
-      message: "I'm skilled in technical setup and troubleshooting. I'd like to volunteer for this position.",
+      message:
+        "I'm skilled in technical setup and troubleshooting. I'd like to volunteer for this position.",
     },
     {
       id: "va4",
@@ -117,7 +149,8 @@ export default function EventVolunteersPage() {
       position: "Stage Management",
       applicationDate: "2023-05-18",
       status: "Rejected",
-      message: "I want to gain experience in event management and this seems like a great opportunity.",
+      message:
+        "I want to gain experience in event management and this seems like a great opportunity.",
     },
     {
       id: "va5",
@@ -129,46 +162,57 @@ export default function EventVolunteersPage() {
       position: "Registration Desk",
       applicationDate: "2023-05-19",
       status: "Approved",
-      message: "I'm organized and enjoy interacting with people. I'd be a great fit for the registration desk.",
+      message:
+        "I'm organized and enjoy interacting with people. I'd be a great fit for the registration desk.",
     },
-  ]
+  ];
 
   // Filter applications based on search term and filters
   const filteredApplications = mockVolunteerApplications.filter((app) => {
     const matchesSearch =
       app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.department.toLowerCase().includes(searchTerm.toLowerCase())
+      app.department.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === "all" || app.status.toLowerCase() === statusFilter.toLowerCase()
-    const matchesPosition = positionFilter === "all" || app.position === positionFilter
+    const matchesStatus =
+      statusFilter === "all" ||
+      app.status.toLowerCase() === statusFilter.toLowerCase();
+    const matchesPosition =
+      positionFilter === "all" || app.position === positionFilter;
 
-    return matchesSearch && matchesStatus && matchesPosition
-  })
+    return matchesSearch && matchesStatus && matchesPosition;
+  });
 
   const handleApprove = (applicationId: string) => {
     toast({
       title: "Volunteer Approved",
       description: "The volunteer application has been approved successfully.",
-    })
-  }
+    });
+  };
 
   const handleReject = (applicationId: string) => {
-    setIsRejectDialogOpen(false)
+    setIsRejectDialogOpen(false);
     toast({
       title: "Volunteer Rejected",
       description: "The volunteer application has been rejected.",
-    })
-  }
+    });
+  };
 
   return (
     <div className="container py-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">{event.title} - Volunteers</h1>
-          <p className="text-muted-foreground mt-1">Manage volunteer applications for this event</p>
+          <p className="text-muted-foreground mt-1">
+            Manage volunteer applications for this event
+          </p>
         </div>
-        <div className="mt-4 md:mt-0">
+        <div className="mt-4 md:mt-0 flex gap-2">
+          <Button asChild>
+            <Link href={`/events/${id}/volunteers/applications`}>
+              View Applications
+            </Link>
+          </Button>
           <Button variant="outline" asChild>
             <Link href={`/events/${id}`}>Back to Event</Link>
           </Button>
@@ -188,7 +232,9 @@ export default function EventVolunteersPage() {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                   <CardTitle>Volunteer Applications</CardTitle>
-                  <CardDescription>Review and manage volunteer applications</CardDescription>
+                  <CardDescription>
+                    Review and manage volunteer applications
+                  </CardDescription>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Button variant="outline">
@@ -220,7 +266,10 @@ export default function EventVolunteersPage() {
                     <SelectItem value="rejected">Rejected</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={positionFilter} onValueChange={setPositionFilter}>
+                <Select
+                  value={positionFilter}
+                  onValueChange={setPositionFilter}
+                >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Position" />
                   </SelectTrigger>
@@ -239,17 +288,30 @@ export default function EventVolunteersPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b bg-muted/50">
-                      <th className="py-3 px-4 text-left font-medium">Applicant</th>
-                      <th className="py-3 px-4 text-left font-medium">Position</th>
-                      <th className="py-3 px-4 text-left font-medium">Applied On</th>
-                      <th className="py-3 px-4 text-left font-medium">Status</th>
-                      <th className="py-3 px-4 text-left font-medium">Actions</th>
+                      <th className="py-3 px-4 text-left font-medium">
+                        Applicant
+                      </th>
+                      <th className="py-3 px-4 text-left font-medium">
+                        Position
+                      </th>
+                      <th className="py-3 px-4 text-left font-medium">
+                        Applied On
+                      </th>
+                      <th className="py-3 px-4 text-left font-medium">
+                        Status
+                      </th>
+                      <th className="py-3 px-4 text-left font-medium">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredApplications.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="py-6 text-center text-muted-foreground">
+                        <td
+                          colSpan={5}
+                          className="py-6 text-center text-muted-foreground"
+                        >
                           No applications found matching your filters.
                         </td>
                       </tr>
@@ -259,24 +321,32 @@ export default function EventVolunteersPage() {
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8">
-                                <AvatarFallback>{application.name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>
+                                  {application.name.charAt(0)}
+                                </AvatarFallback>
                               </Avatar>
                               <div>
-                                <p className="font-medium">{application.name}</p>
-                                <p className="text-xs text-muted-foreground">{application.department}</p>
+                                <p className="font-medium">
+                                  {application.name}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {application.department}
+                                </p>
                               </div>
                             </div>
                           </td>
                           <td className="py-3 px-4">{application.position}</td>
-                          <td className="py-3 px-4">{application.applicationDate}</td>
+                          <td className="py-3 px-4">
+                            {application.applicationDate}
+                          </td>
                           <td className="py-3 px-4">
                             <Badge
                               variant={
                                 application.status === "Approved"
                                   ? "default"
                                   : application.status === "Pending"
-                                    ? "outline"
-                                    : "destructive"
+                                  ? "outline"
+                                  : "destructive"
                               }
                             >
                               {application.status}
@@ -286,49 +356,74 @@ export default function EventVolunteersPage() {
                             <div className="flex gap-2">
                               <Dialog>
                                 <DialogTrigger asChild>
-                                  <Button size="sm" variant="outline" className="h-8">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8"
+                                  >
                                     <Eye className="h-4 w-4 mr-1" /> View
                                   </Button>
                                 </DialogTrigger>
                                 <DialogContent>
                                   <DialogHeader>
-                                    <DialogTitle>Volunteer Application</DialogTitle>
+                                    <DialogTitle>
+                                      Volunteer Application
+                                    </DialogTitle>
                                     <DialogDescription>
-                                      Application details for {application.position}
+                                      Application details for{" "}
+                                      {application.position}
                                     </DialogDescription>
                                   </DialogHeader>
                                   <div className="space-y-4 py-4">
                                     <div className="flex items-center gap-3">
                                       <Avatar className="h-12 w-12">
-                                        <AvatarFallback>{application.name.charAt(0)}</AvatarFallback>
+                                        <AvatarFallback>
+                                          {application.name.charAt(0)}
+                                        </AvatarFallback>
                                       </Avatar>
                                       <div>
-                                        <p className="font-medium">{application.name}</p>
-                                        <p className="text-sm text-muted-foreground">{application.email}</p>
-                                        <p className="text-sm text-muted-foreground">{application.department}</p>
+                                        <p className="font-medium">
+                                          {application.name}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">
+                                          {application.email}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">
+                                          {application.department}
+                                        </p>
                                       </div>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium mb-1">Position</p>
+                                      <p className="text-sm font-medium mb-1">
+                                        Position
+                                      </p>
                                       <p>{application.position}</p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium mb-1">Application Date</p>
+                                      <p className="text-sm font-medium mb-1">
+                                        Application Date
+                                      </p>
                                       <p>{application.applicationDate}</p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium mb-1">Motivation</p>
-                                      <p className="text-sm">{application.message}</p>
+                                      <p className="text-sm font-medium mb-1">
+                                        Motivation
+                                      </p>
+                                      <p className="text-sm">
+                                        {application.message}
+                                      </p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium mb-1">Status</p>
+                                      <p className="text-sm font-medium mb-1">
+                                        Status
+                                      </p>
                                       <Badge
                                         variant={
                                           application.status === "Approved"
                                             ? "default"
                                             : application.status === "Pending"
-                                              ? "outline"
-                                              : "destructive"
+                                            ? "outline"
+                                            : "destructive"
                                         }
                                       >
                                         {application.status}
@@ -338,22 +433,40 @@ export default function EventVolunteersPage() {
                                   <DialogFooter>
                                     {application.status === "Pending" && (
                                       <>
-                                        <Button variant="outline" onClick={() => setIsRejectDialogOpen(true)}>
+                                        <Button
+                                          variant="outline"
+                                          onClick={() =>
+                                            setIsRejectDialogOpen(true)
+                                          }
+                                        >
                                           <X className="h-4 w-4 mr-1" /> Reject
                                         </Button>
-                                        <Button onClick={() => handleApprove(application.id)}>
-                                          <Check className="h-4 w-4 mr-1" /> Approve
+                                        <Button
+                                          onClick={() =>
+                                            handleApprove(application.id)
+                                          }
+                                        >
+                                          <Check className="h-4 w-4 mr-1" />{" "}
+                                          Approve
                                         </Button>
                                       </>
                                     )}
-                                    {application.status !== "Pending" && <Button variant="outline">Close</Button>}
+                                    {application.status !== "Pending" && (
+                                      <Button variant="outline">Close</Button>
+                                    )}
                                   </DialogFooter>
                                 </DialogContent>
                               </Dialog>
 
                               {application.status === "Pending" && (
                                 <>
-                                  <Button size="sm" className="h-8" onClick={() => handleApprove(application.id)}>
+                                  <Button
+                                    size="sm"
+                                    className="h-8"
+                                    onClick={() =>
+                                      handleApprove(application.id)
+                                    }
+                                  >
                                     <Check className="h-4 w-4 mr-1" /> Approve
                                   </Button>
                                   <Button
@@ -361,8 +474,8 @@ export default function EventVolunteersPage() {
                                     variant="outline"
                                     className="h-8 text-destructive"
                                     onClick={() => {
-                                      setSelectedVolunteer(application.id)
-                                      setIsRejectDialogOpen(true)
+                                      setSelectedVolunteer(application.id);
+                                      setIsRejectDialogOpen(true);
                                     }}
                                   >
                                     <X className="h-4 w-4 mr-1" /> Reject
@@ -379,8 +492,15 @@ export default function EventVolunteersPage() {
               </div>
               <div className="flex items-center justify-between mt-4">
                 <p className="text-sm text-muted-foreground">
-                  Showing <span className="font-medium">{filteredApplications.length}</span> of{" "}
-                  <span className="font-medium">{mockVolunteerApplications.length}</span> applications
+                  Showing{" "}
+                  <span className="font-medium">
+                    {filteredApplications.length}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-medium">
+                    {mockVolunteerApplications.length}
+                  </span>{" "}
+                  applications
                 </p>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" disabled>
@@ -401,7 +521,9 @@ export default function EventVolunteersPage() {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                   <CardTitle>Volunteer Positions</CardTitle>
-                  <CardDescription>Manage volunteer positions for this event</CardDescription>
+                  <CardDescription>
+                    Manage volunteer positions for this event
+                  </CardDescription>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Button>
@@ -416,8 +538,12 @@ export default function EventVolunteersPage() {
                   <div key={position.id} className="border rounded-lg p-4">
                     <div className="flex flex-col md:flex-row justify-between gap-4">
                       <div>
-                        <h3 className="text-lg font-medium">{position.title}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">{position.description}</p>
+                        <h3 className="text-lg font-medium">
+                          {position.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {position.description}
+                        </p>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {position.skills.map((skill, index) => (
                             <Badge key={index} variant="outline">
@@ -427,18 +553,33 @@ export default function EventVolunteersPage() {
                         </div>
                       </div>
                       <div className="flex flex-col items-start md:items-end gap-2">
-                        <Badge variant={position.status === "Open" ? "default" : "secondary"}>{position.status}</Badge>
+                        <Badge
+                          variant={
+                            position.status === "Open" ? "default" : "secondary"
+                          }
+                        >
+                          {position.status}
+                        </Badge>
                         <p className="text-sm">
-                          <span className="font-medium">{position.applied}</span>
+                          <span className="font-medium">
+                            {position.applied}
+                          </span>
                           <span className="text-muted-foreground"> of </span>
                           <span className="font-medium">{position.slots}</span>
-                          <span className="text-muted-foreground"> positions filled</span>
+                          <span className="text-muted-foreground">
+                            {" "}
+                            positions filled
+                          </span>
                         </p>
                         <div className="flex gap-2">
                           <Button size="sm" variant="outline">
                             Edit
                           </Button>
-                          <Button size="sm" variant="outline" className="text-destructive">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-destructive"
+                          >
                             Close
                           </Button>
                         </div>
@@ -457,7 +598,9 @@ export default function EventVolunteersPage() {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                   <CardTitle>Approved Volunteers</CardTitle>
-                  <CardDescription>List of approved volunteers for this event</CardDescription>
+                  <CardDescription>
+                    List of approved volunteers for this event
+                  </CardDescription>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Button variant="outline">
@@ -471,11 +614,21 @@ export default function EventVolunteersPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b bg-muted/50">
-                      <th className="py-3 px-4 text-left font-medium">Volunteer</th>
-                      <th className="py-3 px-4 text-left font-medium">Position</th>
-                      <th className="py-3 px-4 text-left font-medium">Department</th>
-                      <th className="py-3 px-4 text-left font-medium">Contact</th>
-                      <th className="py-3 px-4 text-left font-medium">Actions</th>
+                      <th className="py-3 px-4 text-left font-medium">
+                        Volunteer
+                      </th>
+                      <th className="py-3 px-4 text-left font-medium">
+                        Position
+                      </th>
+                      <th className="py-3 px-4 text-left font-medium">
+                        Department
+                      </th>
+                      <th className="py-3 px-4 text-left font-medium">
+                        Contact
+                      </th>
+                      <th className="py-3 px-4 text-left font-medium">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -486,7 +639,9 @@ export default function EventVolunteersPage() {
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8">
-                                <AvatarFallback>{volunteer.name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>
+                                  {volunteer.name.charAt(0)}
+                                </AvatarFallback>
                               </Avatar>
                               <div>
                                 <p className="font-medium">{volunteer.name}</p>
@@ -498,10 +653,18 @@ export default function EventVolunteersPage() {
                           <td className="py-3 px-4">{volunteer.email}</td>
                           <td className="py-3 px-4">
                             <div className="flex gap-2">
-                              <Button size="sm" variant="outline" className="h-8">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8"
+                              >
                                 <Mail className="h-4 w-4 mr-1" /> Contact
                               </Button>
-                              <Button size="sm" variant="outline" className="h-8 text-destructive">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 text-destructive"
+                              >
                                 <X className="h-4 w-4 mr-1" /> Remove
                               </Button>
                             </div>
@@ -520,30 +683,47 @@ export default function EventVolunteersPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Reject Volunteer Application</DialogTitle>
-            <DialogDescription>Are you sure you want to reject this volunteer application?</DialogDescription>
+            <DialogDescription>
+              Are you sure you want to reject this volunteer application?
+            </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <div className="space-y-2">
               <Label htmlFor="rejection-reason">Reason (Optional)</Label>
-              <Textarea id="rejection-reason" placeholder="Provide a reason for rejection..." rows={3} />
-              <p className="text-xs text-muted-foreground">This reason will be shared with the applicant.</p>
+              <Textarea
+                id="rejection-reason"
+                placeholder="Provide a reason for rejection..."
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">
+                This reason will be shared with the applicant.
+              </p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsRejectDialogOpen(false)}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={() => handleReject(selectedVolunteer || "")}>
+            <Button
+              variant="destructive"
+              onClick={() => handleReject(selectedVolunteer || "")}
+            >
               Reject Application
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
 
-function Plus({ className, ...props }: React.SVGProps<SVGSVGElement> & { className?: string }) {
+function Plus({
+  className,
+  ...props
+}: React.SVGProps<SVGSVGElement> & { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -558,10 +738,13 @@ function Plus({ className, ...props }: React.SVGProps<SVGSVGElement> & { classNa
     >
       <path d="M12 5v14M5 12h14" />
     </svg>
-  )
+  );
 }
 
-function Mail({ className, ...props }: React.SVGProps<SVGSVGElement> & { className?: string }) {
+function Mail({
+  className,
+  ...props
+}: React.SVGProps<SVGSVGElement> & { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -577,6 +760,5 @@ function Mail({ className, ...props }: React.SVGProps<SVGSVGElement> & { classNa
       <rect width="20" height="16" x="2" y="4" rx="2" />
       <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
     </svg>
-  )
+  );
 }
-
