@@ -1,54 +1,66 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useSearchParams } from "next/navigation"
-import Link from "next/link"
-import Image from "next/image"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, MapPin, Users, Search, Filter } from "lucide-react"
-import { upcomingEvents, eventCategories } from "@/lib/data"
-import { useAuth } from "@/lib/auth-context"
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar, MapPin, Users, Search, Filter } from "lucide-react";
+import { eventCategories } from "@/lib/data"; // Keep categories from data file
+import { useAuth } from "@/lib/auth-context";
+import { useEvents } from "@/lib/event-context"; // Use the event context
 
 export default function EventsPage() {
-  const searchParams = useSearchParams()
-  const categoryParam = searchParams.get("category")
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
 
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState(categoryParam || "")
-  const [sortBy, setSortBy] = useState("date")
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(categoryParam || "");
+  const [sortBy, setSortBy] = useState("date");
 
-  const { user } = useAuth()
+  const { user } = useAuth();
+  const { events, isLoading, error } = useEvents();
 
   // Filter events based on search term and category
-  const filteredEvents = upcomingEvents.filter((event) => {
+  const filteredEvents = events.filter((event) => {
     const matchesSearch =
       event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory ? event.category === selectedCategory : true
-    return matchesSearch && matchesCategory
-  })
+      event.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory
+      ? event.category === selectedCategory
+      : true;
+    return matchesSearch && matchesCategory;
+  });
 
   // Sort events based on selected criteria
   const sortedEvents = [...filteredEvents].sort((a, b) => {
     if (sortBy === "date") {
-      return new Date(a.date).getTime() - new Date(b.date).getTime()
+      return new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime();
     } else if (sortBy === "popularity") {
-      return b.registered - a.registered
+      return b.currentEnrolled - a.currentEnrolled;
     } else if (sortBy === "capacity") {
-      return b.capacity - b.registered - (a.capacity - a.registered)
+      return b.capacity - b.currentEnrolled - (a.capacity - a.currentEnrolled);
     }
-    return 0
-  })
+    return 0;
+  });
 
   return (
     <div className="container py-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">Events</h1>
-          <p className="text-muted-foreground mt-1">Browse and register for upcoming events at DIU</p>
+          <p className="text-muted-foreground mt-1">
+            Browse and register for upcoming events at DIU
+          </p>
         </div>
         {user?.role === "organizer" && (
           <Button asChild className="mt-4 md:mt-0">
@@ -76,7 +88,9 @@ export default function EventsPage() {
               <button
                 onClick={() => setSelectedCategory("")}
                 className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                  selectedCategory === "" ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                  selectedCategory === ""
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-muted"
                 }`}
               >
                 All Categories
@@ -86,10 +100,15 @@ export default function EventsPage() {
                   key={category.id}
                   onClick={() => setSelectedCategory(category.name)}
                   className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                    selectedCategory === category.name ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                    selectedCategory === category.name
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-muted"
                   }`}
                 >
-                  {category.name} <span className="text-xs text-muted-foreground">({category.count})</span>
+                  {category.name}{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({category.count})
+                  </span>
                 </button>
               ))}
             </div>
@@ -113,7 +132,8 @@ export default function EventsPage() {
         <div className="lg:col-span-3">
           <div className="flex items-center justify-between mb-6">
             <p className="text-muted-foreground">
-              {sortedEvents.length} {sortedEvents.length === 1 ? "event" : "events"} found
+              {sortedEvents.length}{" "}
+              {sortedEvents.length === 1 ? "event" : "events"} found
             </p>
             <div className="flex items-center gap-2 lg:hidden">
               <Filter className="h-4 w-4" />
@@ -121,10 +141,23 @@ export default function EventsPage() {
             </div>
           </div>
 
-          {sortedEvents.length === 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium text-destructive">{error}</h3>
+              <Button onClick={() => window.location.reload()} className="mt-4">
+                Try Again
+              </Button>
+            </div>
+          ) : sortedEvents.length === 0 ? (
             <div className="text-center py-12">
               <h3 className="text-lg font-medium">No events found</h3>
-              <p className="text-muted-foreground mt-1">Try adjusting your search or filters</p>
+              <p className="text-muted-foreground mt-1">
+                Try adjusting your search or filters
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -135,17 +168,28 @@ export default function EventsPage() {
                   className="group bg-card hover:bg-accent transition-colors rounded-lg overflow-hidden border shadow-sm"
                 >
                   <div className="relative h-48 w-full">
-                    <Image src={event.image || "/placeholder.svg"} alt={event.title} fill className="object-cover" />
-                    <Badge className="absolute top-3 right-3">{event.category}</Badge>
+                    <Image
+                      src={event.eventBannerBase64 || "/placeholder.svg"}
+                      alt={event.title}
+                      fill
+                      className="object-cover"
+                    />
+                    <Badge className="absolute top-3 right-3">
+                      {event.category}
+                    </Badge>
                   </div>
                   <div className="p-5 space-y-2">
                     <h3 className="font-semibold text-lg group-hover:text-primary transition-colors line-clamp-1">
                       {event.title}
                     </h3>
-                    <p className="text-muted-foreground line-clamp-2">{event.description.substring(0, 100)}...</p>
+                    <p className="text-muted-foreground line-clamp-2">
+                      {event.description.substring(0, 100)}...
+                    </p>
                     <div className="flex items-center text-muted-foreground gap-1">
                       <Calendar size={16} />
-                      <span className="text-sm">{event.date}</span>
+                      <span className="text-sm">
+                        {new Date(event.eventDate).toLocaleDateString()}
+                      </span>
                     </div>
                     <div className="flex items-center text-muted-foreground gap-1">
                       <MapPin size={16} />
@@ -153,20 +197,32 @@ export default function EventsPage() {
                     </div>
                     <div className="flex items-center text-muted-foreground gap-1">
                       <Users size={16} />
-                      <span className="text-sm">{event.registered} registered</span>
+                      <span className="text-sm">
+                        {event.currentEnrolled} registered
+                      </span>
                     </div>
                     <div className="flex justify-between items-center pt-2">
                       <div className="text-sm font-medium">
-                        {event.price === "Free" ? (
-                          <span className="text-green-600 dark:text-green-400">Free</span>
+                        {event.isFree ? (
+                          <span className="text-green-600 dark:text-green-400">
+                            Free
+                          </span>
                         ) : (
-                          <span>{event.price}</span>
+                          <span>{event.price} BDT</span>
                         )}
                       </div>
-                      <Badge variant={event.registered >= event.capacity ? "destructive" : "outline"}>
-                        {event.registered >= event.capacity
+                      <Badge
+                        variant={
+                          event.currentEnrolled >= event.capacity
+                            ? "destructive"
+                            : "outline"
+                        }
+                      >
+                        {event.currentEnrolled >= event.capacity
                           ? "Full"
-                          : `${event.capacity - event.registered} spots left`}
+                          : `${
+                              event.capacity - event.currentEnrolled
+                            } spots left`}
                       </Badge>
                     </div>
                   </div>
@@ -177,6 +233,5 @@ export default function EventsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

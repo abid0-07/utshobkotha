@@ -1,13 +1,12 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useToast } from "@/components/ui/use-toast"
+import type React from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
+import api from "./api-service";
 
-// First, let's fix the type definitions to ensure consistency
-
-// Update the Permission type to include all permissions used in the mock data
+// Permission types for role-based access control
 type Permission =
   | "manage_users"
   | "manage_events"
@@ -18,24 +17,37 @@ type Permission =
   | "manage_own_events"
   | "view_own_analytics"
   | "view_events"
-  | "register_events"
+  | "register_events";
 
-type UserRole = "admin" | "organizer" | "faculty" | "student"
+type UserRole = "admin" | "organizer" | "faculty" | "student";
 
-// Remove the mfaEnabled field from the User type
+// User type definition
 type User = {
-  id: string
-  email: string
-  name: string
-  role: UserRole
-  department?: string
-  image?: string
-  phoneNumber?: string
-  permissions: Permission[]
-  lastLogin: string
-}
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  department?: string;
+  image?: string;
+  phoneNumber?: string;
+  permissions: Permission[];
+  lastLogin: string;
+};
 
-// Update the mockUsers array to remove mfaEnabled field
+// API response types
+type AuthResponse = {
+  token: string;
+  userId: string;
+  name: string;
+  email: string;
+  role: string;
+  permissions: string[];
+  department?: string;
+  image?: string;
+  phoneNumber?: string;
+};
+
+// For fallback/development mode
 const mockUsers: (User & { password: string })[] = [
   {
     id: "1",
@@ -46,7 +58,13 @@ const mockUsers: (User & { password: string })[] = [
     department: "IT",
     image: "/placeholder.svg?height=30&width=30",
     phoneNumber: "+8801712345678",
-    permissions: ["manage_users", "manage_events", "manage_settings", "view_analytics", "manage_finances"],
+    permissions: [
+      "manage_users",
+      "manage_events",
+      "manage_settings",
+      "view_analytics",
+      "manage_finances",
+    ],
     lastLogin: "2023-06-01T10:30:00Z",
   },
   {
@@ -85,213 +103,346 @@ const mockUsers: (User & { password: string })[] = [
     permissions: ["view_events", "register_events"],
     lastLogin: "2023-06-04T16:45:00Z",
   },
-]
+];
 
-// Remove MFA-related functions from the AuthContextType
+// Context type definition
 type AuthContextType = {
-  user: User | null
-  login: (email: string, password: string) => Promise<void>
-  register: (name: string, email: string, password: string, role: string) => Promise<void>
-  logout: () => void
-  isLoading: boolean
-  requestPasswordReset: (email: string) => Promise<void>
-  resetPassword: (token: string, newPassword: string) => Promise<void>
-  hasPermission: (permission: Permission) => boolean
-}
+  user: User | null;
+  login: (email: string, password: string) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    role: string
+  ) => Promise<void>;
+  logout: () => void;
+  isLoading: boolean;
+  requestPasswordReset: (email: string) => Promise<void>;
+  resetPassword: (token: string, newPassword: string) => Promise<void>;
+  hasPermission: (permission: Permission) => boolean;
+};
 
-const AuthContext = createContext<AuthContextType | null>(null)
+const AuthContext = createContext<AuthContextType | null>(null);
 
-// Remove pendingMfaUser state and MFA-related functions from the AuthProvider
+// Configuration flag for development mode
+const USE_MOCK_DATA = false; // Set to false to use real API
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
-  const { toast } = useToast()
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Check if user is stored in localStorage
-    const storedUser = localStorage.getItem("user")
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser))
+      setUser(JSON.parse(storedUser));
     }
-    setIsLoading(false)
-  }, [])
+    setIsLoading(false);
+  }, []);
 
   const login = async (email: string, password: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
 
-    // Simulate API request
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    if (USE_MOCK_DATA) {
+      // Mock login for development
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const foundUser = mockUsers.find(
+        (u) => u.email === email && u.password === password
+      );
 
-    const foundUser = mockUsers.find((u) => u.email === email && u.password === password)
-
-    if (foundUser) {
-      // Remove password from user object before storing
-      const { password, ...userWithoutPassword } = foundUser
-      completeLogin(userWithoutPassword as User)
+      if (foundUser) {
+        const { password, ...userWithoutPassword } = foundUser;
+        completeLogin(userWithoutPassword as User);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Login failed",
+          description: "Invalid email or password.",
+        });
+        setIsLoading(false);
+      }
     } else {
-      toast({
-        variant: "destructive",
-        title: "Login failed",
-        description: "Invalid email or password.",
-      })
-      setIsLoading(false)
+      // Real API login
+      try {
+        const response = await api.post<AuthResponse>("/Login", {
+          email,
+          password,
+        });
+
+        // Create user object from API response
+        const user: User = {
+          id: response.data.userId,
+          email: response.data.email,
+          name: response.data.name,
+          role: response.data.role as UserRole,
+          department: response.data.department,
+          image: response.data.image,
+          phoneNumber: response.data.phoneNumber,
+          permissions: response.data.permissions as Permission[],
+          lastLogin: new Date().toISOString(),
+        };
+
+        // Store token in localStorage
+        localStorage.setItem("token", response.data.token);
+        completeLogin(user);
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Login failed",
+          description:
+            error.response?.data?.message || "Invalid email or password.",
+        });
+        setIsLoading(false);
+      }
     }
-  }
+  };
 
-  // Remove the loginWithSocial function
-
-  // Now fix the completeLogin function
   const completeLogin = (userObj: User) => {
     // Update last login time
     const updatedUser: User = {
       ...userObj,
       lastLogin: new Date().toISOString(),
-    }
+    };
 
-    setUser(updatedUser)
-    localStorage.setItem("user", JSON.stringify(updatedUser))
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
 
     toast({
       title: "Login successful",
       description: `Welcome back, ${updatedUser.name}!`,
-    })
+    });
 
-    router.push("/")
-    setIsLoading(false)
-  }
+    router.push("/");
+    setIsLoading(false);
+  };
 
-  // Fix the register function to remove socialLogins
-  const register = async (name: string, email: string, password: string, roleInput: string) => {
-    setIsLoading(true)
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    roleInput: string
+  ) => {
+    setIsLoading(true);
 
-    // Simulate API request
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    if (USE_MOCK_DATA) {
+      // Mock register for development
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const userExists = mockUsers.some((u) => u.email === email);
 
-    // Check if user already exists
-    const userExists = mockUsers.some((u) => u.email === email)
+      if (userExists) {
+        toast({
+          variant: "destructive",
+          title: "Registration failed",
+          description: "Email already exists.",
+        });
+        setIsLoading(false);
+        return;
+      }
 
-    if (userExists) {
+      const role = roleInput as UserRole;
+      if (!["admin", "organizer", "faculty", "student"].includes(role)) {
+        toast({
+          variant: "destructive",
+          title: "Registration failed",
+          description: "Invalid role specified.",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      let permissions: Permission[] = [];
+      if (role === "admin") {
+        permissions = [
+          "manage_users",
+          "manage_events",
+          "manage_settings",
+          "view_analytics",
+          "manage_finances",
+        ];
+      } else if (role === "organizer") {
+        permissions = [
+          "create_events",
+          "manage_own_events",
+          "view_own_analytics",
+        ];
+      } else if (role === "faculty") {
+        permissions = ["view_events", "register_events", "create_events"];
+      } else {
+        permissions = ["view_events", "register_events"];
+      }
+
+      const newUser: User = {
+        id: String(mockUsers.length + 1),
+        email,
+        name,
+        role,
+        image: "/placeholder.svg?height=30&width=30",
+        phoneNumber: "",
+        permissions,
+        lastLogin: new Date().toISOString(),
+      };
+
+      mockUsers.push({ ...newUser, password });
+      setUser(newUser);
+      localStorage.setItem("user", JSON.stringify(newUser));
+
       toast({
-        variant: "destructive",
-        title: "Registration failed",
-        description: "Email already exists.",
-      })
-      setIsLoading(false)
-      return
-    }
+        title: "Registration successful",
+        description: "Your account has been created.",
+      });
 
-    // Validate role
-    const role = roleInput as UserRole
-    if (!["admin", "organizer", "faculty", "student"].includes(role)) {
-      toast({
-        variant: "destructive",
-        title: "Registration failed",
-        description: "Invalid role specified.",
-      })
-      setIsLoading(false)
-      return
-    }
-
-    // Determine permissions based on role
-    let permissions: Permission[] = []
-    if (role === "admin") {
-      permissions = ["manage_users", "manage_events", "manage_settings", "view_analytics", "manage_finances"]
-    } else if (role === "organizer") {
-      permissions = ["create_events", "manage_own_events", "view_own_analytics"]
-    } else if (role === "faculty") {
-      permissions = ["view_events", "register_events", "create_events"]
+      router.push("/");
     } else {
-      permissions = ["view_events", "register_events"]
+      // Real API register
+      try {
+        const response = await api.post<AuthResponse>("/SignUp", {
+          name,
+          email,
+          password,
+          role: roleInput,
+        });
+
+        // Create user object from API response
+        const user: User = {
+          id: response.data.userId,
+          email: response.data.email,
+          name: response.data.name,
+          role: response.data.role as UserRole,
+          department: response.data.department,
+          image: response.data.image || "/placeholder.svg?height=30&width=30",
+          phoneNumber: response.data.phoneNumber || "",
+          permissions: response.data.permissions as Permission[],
+          lastLogin: new Date().toISOString(),
+        };
+
+        // Store token in localStorage
+        localStorage.setItem("token", response.data.token);
+
+        // Store user in state and localStorage
+        setUser(user);
+        localStorage.setItem("user", JSON.stringify(user));
+
+        toast({
+          title: "Registration successful",
+          description: "Your account has been created.",
+        });
+
+        router.push("/");
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Registration failed",
+          description:
+            error.response?.data?.message || "Failed to create account.",
+        });
+      }
     }
 
-    // Create new user without socialLogins
-    const newUser: User = {
-      id: String(mockUsers.length + 1),
-      email,
-      name,
-      role,
-      image: "/placeholder.svg?height=30&width=30",
-      phoneNumber: "",
-      permissions,
-      lastLogin: new Date().toISOString(),
-    }
-
-    // For demo purposes - wouldn't store this in a real app
-    mockUsers.push({ ...newUser, password })
-
-    // Set the current user
-    setUser(newUser)
-    localStorage.setItem("user", JSON.stringify(newUser))
-
-    toast({
-      title: "Registration successful",
-      description: "Your account has been created.",
-    })
-
-    router.push("/")
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   const requestPasswordReset = async (email: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
 
-    // Simulate API request
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    if (USE_MOCK_DATA) {
+      // Mock request for development
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    const userExists = mockUsers.some((u) => u.email === email)
-
-    if (userExists) {
       toast({
         title: "Reset Email Sent",
-        description: "If an account exists with this email, you will receive password reset instructions.",
-      })
+        description:
+          "If an account exists with this email, you will receive password reset instructions.",
+      });
     } else {
-      // For security reasons, don't reveal if the email exists or not
-      toast({
-        title: "Reset Email Sent",
-        description: "If an account exists with this email, you will receive password reset instructions.",
-      })
+      // Real API request
+      try {
+        await api.post("/ForgotPassword", { email });
+
+        toast({
+          title: "Reset Email Sent",
+          description:
+            "If an account exists with this email, you will receive password reset instructions.",
+        });
+      } catch (error) {
+        // For security reasons, don't change the message even if there's an error
+        toast({
+          title: "Reset Email Sent",
+          description:
+            "If an account exists with this email, you will receive password reset instructions.",
+        });
+      }
     }
 
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   const resetPassword = async (token: string, newPassword: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
 
-    // Simulate API request
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    if (USE_MOCK_DATA) {
+      // Mock reset for development
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // In a real app, we would validate the token and update the password
-    // For demo purposes, we'll just show a success message
+      toast({
+        title: "Password Reset Successful",
+        description:
+          "Your password has been updated. You can now log in with your new password.",
+      });
 
-    toast({
-      title: "Password Reset Successful",
-      description: "Your password has been updated. You can now log in with your new password.",
-    })
+      router.push("/auth/login");
+    } else {
+      // Real API reset
+      try {
+        await api.post("/ResetPassword", { token, newPassword });
 
-    router.push("/auth/login")
-    setIsLoading(false)
-  }
+        toast({
+          title: "Password Reset Successful",
+          description:
+            "Your password has been updated. You can now log in with your new password.",
+        });
+
+        router.push("/auth/login");
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Password Reset Failed",
+          description:
+            error.response?.data?.message ||
+            "Failed to reset password. Please try again.",
+        });
+      }
+    }
+
+    setIsLoading(false);
+  };
 
   const logout = () => {
-    setUser(null)
-    localStorage.removeItem("user")
-    router.push("/")
+    setUser(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+
+    // Optional: Call logout endpoint if needed
+    if (!USE_MOCK_DATA) {
+      api.post("/Logout").catch(() => {
+        // Silent catch - we don't want to show errors on logout
+      });
+    }
+
+    router.push("/");
 
     toast({
       title: "Logged out",
       description: "You have been logged out successfully.",
-    })
-  }
+    });
+  };
 
   const hasPermission = (permission: Permission): boolean => {
-    if (!user) return false
-    return user.permissions.includes(permission)
-  }
+    if (!user) return false;
+    return user.permissions.includes(permission);
+  };
 
-  // Update the AuthContext.Provider to remove loginWithSocial
   return (
     <AuthContext.Provider
       value={{
@@ -307,16 +458,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     >
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
 
 export const useAuth = () => {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider")
+    throw new Error("useAuth must be used within an AuthProvider");
   }
 
-  return context
-}
-
+  return context;
+};

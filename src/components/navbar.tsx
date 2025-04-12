@@ -40,7 +40,7 @@ export default function Navbar() {
       <div className="container flex w-full h-16 items-center justify-between px-4 md:px-8">
         <div className="flex items-center">
           <Link href="/" className="flex items-center gap-2">
-            <span className="font-bold text-xl">DIU Event Hub</span>
+            <span className="font-bold text-xl">Utsabkotha</span>
           </Link>
 
           <nav className="hidden md:flex ml-10 space-x-6">
@@ -115,7 +115,7 @@ export default function Navbar() {
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user.image} alt={user.name} />
-                      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>

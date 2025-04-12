@@ -9,7 +9,7 @@ export default function TopBar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-gray-900 text-white py-4 px-6 flex justify-between items-center">
+    <nav className="bg-gray-900 text-white py-4 px-6 flex justify-between items-center w-full">
       {/* Logo */}
       <h1 className="text-xl font-bold">Utsobkotha</h1>
 
